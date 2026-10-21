@@ -1,0 +1,14 @@
+{
+    "player": {
+        "xp": 40,
+        "level": 1
+    },
+    "habits": [
+        {
+            "name": "Чистка зубов",
+            "streak": 1,
+            "best_streak": 1,
+            "last_completed": "2026-10-21"
+        }
+    ]
+}

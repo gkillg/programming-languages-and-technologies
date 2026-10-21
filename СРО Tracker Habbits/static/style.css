@@ -1,0 +1,185 @@
+:root {
+    --bg-color: #0f380f;       /* Зеленая палитра классического Game Boy */
+    --box-bg: #306230;
+    --light-color: #9bbc0f;
+    --accent-color: #8bac0f;
+    --font: 'Press Start 2P', monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: var(--font);
+    color: var(--light-color);
+    padding: 20px;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.retro-container {
+    max-width: 650px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.retro-box {
+    background-color: var(--box-bg);
+    border: 4px solid var(--light-color);
+    padding: 15px;
+    box-shadow: 4px 4px 0px #000;
+}
+
+h1 {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+h2 {
+    font-size: 12px;
+    margin-bottom: 15px;
+    border-bottom: 2px dashed var(--light-color);
+    padding-bottom: 5px;
+}
+
+/* Полоски EXP и прогресса */
+.bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.bar-border {
+    flex-grow: 1;
+    height: 16px;
+    background: #0f380f;
+    border: 2px solid var(--light-color);
+    padding: 1px;
+}
+
+.bar-fill {
+    height: 100%;
+}
+
+.bar-fill.exp { background-color: #e0ac00; }
+.bar-fill.hp { background-color: var(--light-color); }
+
+/* Питомец */
+.pet-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.pet-avatar pre {
+    font-size: 12px;
+    line-height: 1.2;
+    color: var(--light-color);
+}
+
+.pet-dialog {
+    background: #0f380f;
+    border: 2px solid var(--light-color);
+    padding: 10px;
+    border-radius: 4px;
+    flex-grow: 1;
+}
+
+/* Кнопки и формы */
+.retro-input {
+    flex-grow: 1;
+    font-family: var(--font);
+    font-size: 10px;
+    padding: 10px;
+    background: #0f380f;
+    border: 2px solid var(--light-color);
+    color: var(--light-color);
+}
+
+.add-form {
+    display: flex;
+    gap: 10px;
+}
+
+.retro-btn {
+    font-family: var(--font);
+    font-size: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    background: var(--light-color);
+    color: #0f380f;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 2px 2px 0 #000;
+}
+
+.retro-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+}
+
+.btn-del { background: #b83838; color: #fff; }
+.btn-reset { background: #d08828; color: #fff; }
+.btn-done {
+    color: var(--light-color);
+    font-size: 9px;
+    padding: 10px;
+    border: 1px solid var(--light-color);
+}
+
+/* Список */
+.habit-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.habit-card {
+    background: #1b471b;
+    border: 2px solid var(--light-color);
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.habit-card.done {
+    opacity: 0.6;
+}
+
+.habit-name {
+    font-size: 11px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.badge {
+    font-size: 8px;
+    background: #0f380f;
+    padding: 3px 6px;
+    border: 1px solid var(--accent-color);
+    margin-right: 5px;
+}
+
+.messages {
+    background: #0f380f;
+    border: 2px solid var(--light-color);
+    padding: 10px;
+    color: #fff;
+    font-size: 9px;
+}
+
+.empty-text {
+    text-align: center;
+    padding: 20px 0;
+}

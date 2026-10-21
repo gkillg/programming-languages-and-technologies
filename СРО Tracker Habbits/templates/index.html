@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HABBY - Retro Habit Tracker</title>
+    <!-- Пиксельный шрифт от Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="retro-container">
+        
+        <!-- Верхний экран (HUD) -->
+        <header class="retro-box hud">
+            <h1 class="glitch">👾 HABBY TRACKER</h1>
+            <div class="player-stats">
+                <p>ГЕРОЙ: <span class="highlight">Lv.{{ player.level }}</span></p>
+                <div class="bar-container">
+                    <span class="bar-label">EXP:</span>
+                    <div class="bar-border">
+                        <div class="bar-fill exp" style="width: {{ (player.xp / (player.level * 50)) * 100 }}%;"></div>
+                    </div>
+                    <span class="bar-num">{{ player.xp }}/{{ player.level * 50 }}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Питомец Habby -->
+        <section class="retro-box pet-box">
+            <div class="pet-avatar">
+                <pre>
+  (\__/)
+  ( ^.^)
+ c(") (")
+                </pre>
+            </div>
+            <div class="pet-dialog">
+                <p class="dialog-text">
+                    {% if completed_today == total_habits and total_habits > 0 %}
+                        "НЕВЕРОЯТНО! Все квесты закрыты! Ты легенда!"
+                    {% elif completed_today > 0 %}
+                        "Отличная работа! Давай продолжим серию!"
+                    {% else %}
+                        "Пип-боп! Время прокачать свои привычки!"
+                    {% endif %}
+                </p>
+            </div>
+        </section>
+
+        <!-- Системные уведомления -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="messages">
+                    {% for category, message in messages %}
+                        <div class="msg {{ category }}">> {{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Дневной прогресс -->
+        <section class="retro-box day-progress">
+            <div class="bar-container">
+                <span class="bar-label">ДЕНЬ:</span>
+                <div class="bar-border">
+                    <div class="bar-fill hp" style="width: {{ progress_percent }}%;"></div>
+                </div>
+                <span class="bar-num">{{ completed_today }}/{{ total_habits }} ({{ progress_percent }}%)</span>
+            </div>
+        </section>
+
+        <!-- Форма добавления привычки -->
+        <section class="retro-box add-box">
+            <form action="{{ url_for('add_habit') }}" method="POST" class="add-form">
+                <input type="text" name="name" placeholder="Новый квест (привычка)..." required autocomplete="off" class="retro-input">
+                <button type="submit" class="retro-btn btn-add">+ СОЗДАТЬ</button>
+            </form>
+        </section>
+
+        <!-- Список привычек -->
+        <section class="retro-box habit-list-box">
+            <h2>📜 ЖУРНАЛ КВЕСТОВ</h2>
+            {% if habits %}
+                <ul class="habit-list">
+                    {% for h in habits %}
+                    <li class="habit-card {% if h.last_completed == today %}done{% endif %}">
+                        <div class="habit-info">
+                            <span class="habit-name">{{ h.name }}</span>
+                            <div class="habit-badges">
+                                <span class="badge combo">КОМБО: x{{ h.streak }}</span>
+                                <span class="badge record">РЕКОРД: {{ h.best_streak }}</span>
+                            </div>
+                        </div>
+                        <div class="habit-actions">
+                            {% if h.last_completed == today %}
+                                <span class="btn-done">✔ СДЕЛАНО</span>
+                            {% else %}
+                                <a href="{{ url_for('complete_habit', habit_id=loop.index0) }}" class="retro-btn btn-action">ВЫПОЛНИТЬ</a>
+                            {% endif %}
+                            <a href="{{ url_for('reset_habit', habit_id=loop.index0) }}" class="retro-btn btn-reset" title="Сбросить серию">🔄</a>
+                            <a href="{{ url_for('delete_habit', habit_id=loop.index0) }}" class="retro-btn btn-del" title="Удалить">✖</a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-text">Журнал пуст. Добавь свою первую цель выше!</p>
+            {% endif %}
+        </section>
+
+    </div>
+</body>
+</html>

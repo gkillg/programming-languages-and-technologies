@@ -1,27 +1,44 @@
 {
-    "player": {
-        "xp": 60,
-        "level": 2,
-        "completed_total": 1
-    },
-    "habits": [
-        {
-            "name": "Сделать СРО",
-            "streak": 0,
-            "best_streak": 0,
-            "last_completed": null
-        },
-        {
-            "name": "Защитить Сро",
-            "streak": 0,
-            "best_streak": 0,
-            "last_completed": null
-        },
-        {
-            "name": "Выполнить лаб.работы по ЯиТП",
-            "streak": 1,
-            "best_streak": 1,
-            "last_completed": "2026-10-21"
+    "users": {
+        "HB-7257": {
+            "nickname": "Амир",
+            "player": {
+                "xp": 0,
+                "level": 3,
+                "completed_total": 3
+            },
+            "habits": [
+                {
+                    "name": "Сдать Сро",
+                    "streak": 0,
+                    "best_streak": 0,
+                    "last_completed": null
+                },
+                {
+                    "name": "Выполнить лаб.раб по ЯиТП",
+                    "streak": 1,
+                    "best_streak": 1,
+                    "last_completed": "2026-10-21"
+                },
+                {
+                    "name": "Защитить СРо презентацией",
+                    "streak": 0,
+                    "best_streak": 0,
+                    "last_completed": null
+                },
+                {
+                    "name": "Я крут",
+                    "streak": 1,
+                    "best_streak": 1,
+                    "last_completed": "2026-10-21"
+                },
+                {
+                    "name": "Рашидинов ТОП",
+                    "streak": 1,
+                    "best_streak": 1,
+                    "last_completed": "2026-10-21"
+                }
+            ]
         }
-    ]
+    }
 }

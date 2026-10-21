@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бронирование отеля Grand Palace</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card-container">
+    <header class="form-header">
+      <span class="badge">Вариант 18</span>
+      <h2>Отель Grand Palace</h2>
+      <p>Оформление гарантированного бронирования номера</p>
+    </header>
+
+    <form id="bookingForm" novalidate>
+      <div class="form-group">
+        <label for="fullName">ФИО гостя *</label>
+        <input type="text" id="fullName" placeholder="Иванов Иван Иванович" required>
+        <small class="error-msg" id="nameError"></small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Электронная почта *</label>
+          <input type="email" id="email" placeholder="guest@example.com" required>
+          <small class="error-msg" id="emailError"></small>
+        </div>
+        <div class="form-group">
+          <label for="phone">Номер телефона *</label>
+          <input type="tel" id="phone" placeholder="+7 (999) 000-00-00" required>
+          <small class="error-msg" id="phoneError"></small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="checkIn">Дата заезда *</label>
+          <input type="date" id="checkIn" required>
+        </div>
+        <div class="form-group">
+          <label for="checkOut">Дата выезда *</label>
+          <input type="date" id="checkOut" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="roomType">Категория номера</label>
+        <select id="roomType">
+          <option value="standard" data-price="3500">Стандарт (3 500 ₽ / ночь)</option>
+          <option value="comfort" data-price="5200">Комфорт с балконом (5 200 ₽ / ночь)</option>
+          <option value="deluxe" data-price="8500">Люкс с панорамным видом (8 500 ₽ / ночь)</option>
+        </select>
+      </div>
+
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" id="breakfast" value="800">
+          Включить завтрак "шведский стол" (+800 ₽/день)
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="transfer" value="1500">
+          Трансфер из аэропорта (+1 500 ₽)
+        </label>
+      </div>
+
+      <div class="price-summary" id="priceSummary">
+        <span>Предварительная стоимость:</span>
+        <strong id="totalPrice">0 ₽</strong>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Подтвердить бронь</button>
+    </form>
+
+    <div id="resultModal" class="result-modal hidden">
+      <div class="modal-content">
+        <h3>🎉 Бронирование успешно оформлено!</h3>
+        <p id="modalDetails"></p>
+        <button type="button" id="closeModalBtn" class="close-btn">Отлично</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

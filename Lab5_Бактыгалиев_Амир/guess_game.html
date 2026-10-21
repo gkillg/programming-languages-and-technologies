@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Игра «Угадай число»</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+    .game-card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    h2 { color: #38bdf8; margin-top: 0; }
+    p { color: #94a3b8; font-size: 14px; }
+    .input-row { display: flex; gap: 8px; margin: 20px 0; }
+    input { flex: 1; padding: 12px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: #fff; font-size: 16px; text-align: center; }
+    button { padding: 12px 20px; background: #0284c7; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #0369a1; }
+    .status-msg { font-size: 15px; font-weight: 600; min-height: 24px; margin: 12px 0; }
+    .status-msg.hint { color: #fbbf24; }
+    .status-msg.success { color: #4ade80; }
+    .attempts-badge { display: inline-block; background: #334155; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 12px; }
+    .history-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 14px; }
+    .history-pill { background: #0f172a; border: 1px solid #334155; padding: 3px 8px; border-radius: 6px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="game-card">
+    <h2>🎯 Угадай число</h2>
+    <p>Я загадал число от 1 до 100. Сможешь отгадать?</p>
+    <div class="attempts-badge" id="attemptsBadge">Попыток: 0</div>
+    <div class="input-row">
+      <input type="number" id="guessInput" placeholder="Твоя догадка" min="1" max="100">
+      <button id="checkBtn">Проверить</button>
+    </div>
+    <div class="status-msg" id="statusMsg">Сделай первую попытку!</div>
+    <div class="history-list" id="historyList"></div>
+    <button id="restartBtn" style="margin-top: 16px; display: none; width: 100%; background: #4ade80; color: #0f172a;">Сыграть снова</button>
+  </div>
+
+  <script>
+    let secret = Math.floor(Math.random() * 100) + 1;
+    let attempts = 0;
+    const history = [];
+
+    const input = document.getElementById('guessInput');
+    const checkBtn = document.getElementById('checkBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    const attemptsBadge = document.getElementById('attemptsBadge');
+    const historyList = document.getElementById('historyList');
+    const restartBtn = document.getElementById('restartBtn');
+
+    function checkGuess() {
+      const val = parseInt(input.value);
+      if (isNaN(val) || val < 1 || val > 100) {
+        statusMsg.className = 'status-msg hint';
+        statusMsg.textContent = 'Введите число от 1 до 100!';
+        return;
+      }
+
+      attempts++;
+      history.push(val);
+      attemptsBadge.textContent = 'Попыток: ' + attempts;
+
+      const pill = document.createElement('span');
+      pill.className = 'history-pill';
+      pill.textContent = val;
+      historyList.appendChild(pill);
+
+      if (val === secret) {
+        statusMsg.className = 'status-msg success';
+        statusMsg.textContent = '🎉 Победа! Ты угадал число ' + secret + ' за ' + attempts + ' попыток!';
+        input.disabled = true;
+        checkBtn.disabled = true;
+        restartBtn.style.display = 'block';
+      } else if (val < secret) {
+        statusMsg.className = 'status-msg hint';
+        statusMsg.textContent = '📉 Загаданное число БОЛЬШЕ, чем ' + val;
+      } else {
+        statusMsg.className = 'status-msg hint';
+        statusMsg.textContent = '📈 Загаданное число МЕНЬШЕ, чем ' + val;
+      }
+      input.value = '';
+      input.focus();
+    }
+
+    checkBtn.addEventListener('click', checkGuess);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkGuess(); });
+
+    restartBtn.addEventListener('click', () => {
+      secret = Math.floor(Math.random() * 100) + 1;
+      attempts = 0;
+      history.length = 0;
+      historyList.innerHTML = '';
+      attemptsBadge.textContent = 'Попыток: 0';
+      statusMsg.className = 'status-msg';
+      statusMsg.textContent = 'Загадано новое число! Удачи!';
+      input.disabled = false;
+      checkBtn.disabled = false;
+      restartBtn.style.display = 'none';
+      input.focus();
+    });
+  </script>
+</body>
+</html>

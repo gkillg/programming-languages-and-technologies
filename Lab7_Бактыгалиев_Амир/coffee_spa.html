@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aroma Coffee SPA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: #18120e; color: #f5ede6; min-height: 100vh; padding: 20px; display: flex; justify-content: center; }
+    .spa-box { background: #241c16; border: 1px solid #3d3027; border-radius: 18px; padding: 24px; width: 100%; max-width: 580px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+    header { text-align: center; margin-bottom: 18px; }
+    h1 { color: #d4a373; font-size: 24px; }
+    nav { display: flex; justify-content: center; gap: 8px; margin-top: 14px; border-bottom: 1px solid #3d3027; padding-bottom: 14px; }
+    .tab-link { background: transparent; border: 1px solid #5a4537; color: #b09988; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .tab-link.active { background: #d4a373; color: #18120e; border-color: #d4a373; }
+    .tab-page { display: none; padding-top: 16px; }
+    .tab-page.active { display: block; }
+    .menu-item { display: flex; justify-content: space-between; align-items: center; background: #1b140f; border: 1px solid #3d3027; padding: 12px 14px; border-radius: 10px; margin-bottom: 10px; }
+    .menu-info h4 { color: #f5ede6; font-size: 15px; }
+    .menu-info p { color: #9c8270; font-size: 12px; margin-top: 2px; }
+    .price-tag { color: #d4a373; font-weight: bold; font-size: 15px; margin-right: 12px; }
+    .add-btn { background: #d4a373; color: #18120e; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .cart-summary { background: #1b140f; border: 1px solid #3d3027; padding: 16px; border-radius: 10px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="spa-box">
+    <header>
+      <h1>☕ Aroma Coffee Club</h1>
+      <nav>
+        <button class="tab-link active" data-tab="menu">Меню</button>
+        <button class="tab-link" data-tab="cart">Корзина (<span id="cartCount">0</span>)</button>
+        <button class="tab-link" data-tab="about">О нас</button>
+        <button class="tab-link" data-tab="contacts">Контакты</button>
+      </nav>
+    </header>
+
+    <div id="tab-menu" class="tab-page active">
+      <div id="menuList"></div>
+    </div>
+
+    <div id="tab-cart" class="tab-page">
+      <div id="cartItems"></div>
+      <div class="cart-summary">
+        <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 16px;">
+          <span>Итого:</span>
+          <span id="cartTotal">0 ₽</span>
+        </div>
+        <button id="orderBtn" style="width: 100%; margin-top: 12px; padding: 10px; background: #d4a373; color: #18120e; font-weight: bold; border: none; border-radius: 8px; cursor: pointer;">Оформить заказ</button>
+      </div>
+    </div>
+
+    <div id="tab-about" class="tab-page">
+      <h3 style="color: #d4a373; margin-bottom: 8px;">Крафтовая кофейня Aroma</h3>
+      <p style="font-size: 14px; line-height: 1.6; color: #b09988;">Мы обжариваем спешелти зерна 100% арабики свежего урожая из Эфиопии, Колумбии и Кении. Приготовлено с любовью на профессиональном оборудовании.</p>
+    </div>
+
+    <div id="tab-contacts" class="tab-page">
+      <h3 style="color: #d4a373; margin-bottom: 8px;">Наши координаты</h3>
+      <p style="font-size: 14px; color: #b09988; line-height: 1.6;">📍 ул. Университетская, 24<br>📞 +7 (495) 777-22-33<br>⏰ Ежедневно с 08:00 до 22:00</p>
+    </div>
+  </div>
+
+  <script>
+    const menu = [
+      { id: 1, name: "Капучино Grand", desc: "Двойной эспрессо и шелковая молочная пенка", price: 240 },
+      { id: 2, name: "Флэт Уайт", desc: "Яркий кофейный вкус с минимальной пеной", price: 260 },
+      { id: 3, name: "Раф Ванильный", desc: "Кофе на нежных сливках с натуральной ванилью", price: 290 },
+      { id: 4, name: "Эспрессо Тоник", desc: "Освежающий цитрусовый тоник с шотом эспрессо", price: 280 }
+    ];
+
+    const cart = {};
+
+    function renderMenu() {
+      const container = document.getElementById('menuList');
+      container.innerHTML = menu.map(item => `
+        <div class="menu-item">
+          <div class="menu-info">
+            <h4>${item.name}</h4>
+            <p>${item.desc}</p>
+          </div>
+          <div style="display: flex; align-items: center;">
+            <span class="price-tag">${item.price} ₽</span>
+            <button class="add-btn" onclick="addToCart(${item.id})">+</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.addToCart = function(id) {
+      cart[id] = (cart[id] || 0) + 1;
+      updateCartUI();
+    };
+
+    function updateCartUI() {
+      const totalCount = Object.values(cart).reduce((a, b) => a + b, 0);
+      document.getElementById('cartCount').textContent = totalCount;
+
+      const cartContainer = document.getElementById('cartItems');
+      let totalPrice = 0;
+
+      if (totalCount === 0) {
+        cartContainer.innerHTML = '<p style="text-align: center; color: #9c8270; padding: 20px;">Корзина пуста</p>';
+      } else {
+        cartContainer.innerHTML = Object.entries(cart).map(([idStr, count]) => {
+          const item = menu.find(m => m.id === parseInt(idStr));
+          if (!item) return '';
+          const subtotal = item.price * count;
+          totalPrice += subtotal;
+          return `
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #3d3027; font-size: 14px;">
+              <span>${item.name} × ${count}</span>
+              <strong style="color: #d4a373;">${subtotal} ₽</strong>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('cartTotal').textContent = totalPrice + ' ₽';
+    }
+
+    document.querySelectorAll('.tab-link').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    document.getElementById('orderBtn').addEventListener('click', () => {
+      if (Object.keys(cart).length === 0) return alert('Добавьте товары в корзину!');
+      alert('Заказ успешно отправлен бариста! Спасибо за заказ!');
+      for (const k in cart) delete cart[k];
+      updateCartUI();
+    });
+
+    renderMenu();
+    updateCartUI();
+  </script>
+</body>
+</html>

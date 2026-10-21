@@ -1,11 +1,24 @@
 {
     "player": {
-        "xp": 40,
-        "level": 1
+        "xp": 60,
+        "level": 2,
+        "completed_total": 1
     },
     "habits": [
         {
-            "name": "Чистка зубов",
+            "name": "Сделать СРО",
+            "streak": 0,
+            "best_streak": 0,
+            "last_completed": null
+        },
+        {
+            "name": "Защитить Сро",
+            "streak": 0,
+            "best_streak": 0,
+            "last_completed": null
+        },
+        {
+            "name": "Выполнить лаб.работы по ЯиТП",
             "streak": 1,
             "best_streak": 1,
             "last_completed": "2026-10-21"

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HABBY - Выбор Героя</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="console-body">
+        <div class="console-header">
+            <span class="power-led"></span> POWER
+            <span class="brand">HABBY-BOY COLOR</span>
+        </div>
+
+        <div class="screen-frame">
+            <div class="screen-glass login-screen">
+                <h1 style="margin-bottom: 20px;">👾 ВЫБОР СЛОТА</h1>
+
+                <div class="pixel-pet-art" style="text-align: center; margin-bottom: 15px;">
+                    <pre>
+  (\__/)
+  ( o.o)   [ HABBY: "Назови себя, странник!" ]
+ c(") (")
+                    </pre>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="retro-alert {{ category }}">> {{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Новая игра -->
+                <div class="slot-box">
+                    <h2>🎮 НОВЫЙ ГЕРОЙ</h2>
+                    <form action="{{ url_for('register') }}" method="POST" class="auth-form">
+                        <input type="text" name="nickname" placeholder="Имя героя..." required maxlength="15" class="pixel-input">
+                        <button type="submit" class="pixel-btn btn-success">СТАРТ</button>
+                    </form>
+                </div>
+
+                <div style="text-align: center; margin: 15px 0; font-size: 8px;">--- ИЛИ ---</div>
+
+                <!-- Загрузка сохранения -->
+                <div class="slot-box">
+                    <h2>💾 ЗАГРУЗИТЬ (ID)</h2>
+                    <form action="{{ url_for('login') }}" method="POST" class="auth-form">
+                        <input type="text" name="user_id" placeholder="HB-XXXX..." required class="pixel-input">
+                        <button type="submit" class="pixel-btn btn-primary">ВОЙТИ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

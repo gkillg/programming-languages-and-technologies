@@ -9,23 +9,27 @@
 </head>
 <body>
 
-    <!-- Корпус Ретро-Консоли -->
     <div class="console-body">
         <div class="console-header">
             <span class="power-led"></span> POWER
             <span class="brand">HABBY-BOY COLOR</span>
+            <a href="{{ url_for('logout') }}" class="exit-link" title="Сменить слот">ВЫХОД [X]</a>
         </div>
 
-        <!-- Экран консоли со стеклом и сканлайнами -->
         <div class="screen-frame">
             <div class="screen-glass">
 
-                <!-- HUD Игрока -->
+                <!-- HUD игрока с ID слота -->
                 <header class="hud-box">
                     <div class="hud-top">
-                        <span class="player-tag">HERO: <strong class="glow">Lv.{{ player.level }}</strong></span>
-                        <span class="total-tag">CLOSED: {{ player.completed_total|default(0) }}</span>
+                        <span class="player-tag">ГЕРОЙ: <strong class="glow">{{ nickname }}</strong></span>
+                        <span class="id-tag">ID: <strong>{{ user_id }}</strong></span>
                     </div>
+                    <div class="hud-top" style="margin-top: 4px;">
+                        <span>LVL: <strong class="glow">Lv.{{ player.level }}</strong></span>
+                        <span class="total-tag">ЗАКРЫТО: {{ player.completed_total|default(0) }}</span>
+                    </div>
+
                     <div class="stat-row">
                         <span class="stat-name">EXP:</span>
                         <div class="pixel-bar">
@@ -33,6 +37,7 @@
                         </div>
                         <span class="stat-count">{{ player.xp }}/{{ player.level * 60 }}</span>
                     </div>
+
                     <div class="stat-row">
                         <span class="stat-name">DAY:</span>
                         <div class="pixel-bar">
@@ -42,7 +47,7 @@
                     </div>
                 </header>
 
-                <!-- Интерактивный питомец Habby -->
+                <!-- Питомец Habby -->
                 <section class="pet-screen">
                     <div class="pixel-pet-art" id="petArt">
                         <pre>
@@ -54,17 +59,17 @@
                     <div class="speech-bubble">
                         <p id="petPhrase">
                             {% if completed_today == total_habits and total_habits > 0 %}
-                                "ИДЕАЛЬНО! Все квесты закрыты! Ты истинный паладин!"
+                                "{{ nickname }}, все квесты закрыты! Ты легенда!"
                             {% elif completed_today > 0 %}
-                                "Отличный темп! Жми дальше, не сбивай серию!"
+                                "Отличный темп, {{ nickname }}! Жми дальше!"
                             {% else %}
-                                "Пип! Habby ждет подвигов! Закрой хотя бы один квест!"
+                                "Пип! Habby ждет подвигов! Закрой квест!"
                             {% endif %}
                         </p>
                     </div>
                 </section>
 
-                <!-- Сообщения системы -->
+                <!-- Оповещения -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         {% for category, message in messages %}
@@ -73,20 +78,20 @@
                     {% endif %}
                 {% endwith %}
 
-                <!-- Ввод новой привычки -->
+                <!-- Добавление привычки -->
                 <form action="{{ url_for('add_habit') }}" method="POST" class="add-quest-form">
                     <input type="text" name="name" placeholder="Новый квест..." required autocomplete="off" class="pixel-input">
                     <button type="submit" class="pixel-btn btn-primary" onclick="playBeep()">+ КВЕСТ</button>
                 </form>
 
-                <!-- Фильтры квестов -->
+                <!-- Фильтры -->
                 <div class="filter-tabs">
                     <a href="{{ url_for('index', filter='all') }}" class="tab {% if current_filter == 'all' %}active{% endif %}">ВСЕ ({{ total_habits }})</a>
                     <a href="{{ url_for('index', filter='active') }}" class="tab {% if current_filter == 'active' %}active{% endif %}">В ПРОЦЕССЕ</a>
                     <a href="{{ url_for('index', filter='done') }}" class="tab {% if current_filter == 'done' %}active{% endif %}">ГОТОВО</a>
                 </div>
 
-                <!-- Список привычек -->
+                <!-- Список квестов -->
                 <div class="quest-log">
                     {% if habits %}
                         {% for h in habits %}
@@ -110,11 +115,11 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                        <div class="empty-log">В этой вкладке пусто!</div>
+                        <div class="empty-log">Журнал пуст! Добавь свой первый квест.</div>
                     {% endif %}
                 </div>
 
-                <!-- Блок «Поделиться результатами» -->
+                <!-- Шаринг -->
                 <section class="share-box">
                     <div class="share-title">⚡ ПОДЕЛИСЬ УСПЕХАМИ ⚡</div>
                     <div class="share-buttons">
@@ -126,7 +131,7 @@
             </div>
         </div>
 
-        <!-- Нижняя панель консоли с декоративными кнопками -->
+        <!-- Контроллеры консоли -->
         <div class="console-controls">
             <div class="d-pad">
                 <div class="d-up"></div>
@@ -142,10 +147,8 @@
         </div>
     </div>
 
-    <!-- Скрытый холст для генерации графической карточки -->
     <canvas id="shareCanvas" width="600" height="400" style="display:none;"></canvas>
 
-    <!-- 8-битный звук и скрипты шаринга -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -178,12 +181,12 @@
 
         function copyShareText() {
             playBeep();
-            const text = `👾 Мой прогресс в HABBY Tracker!\n` +
-                         `🛡️ Герой: Уровень Lv.{{ player.level }}\n` +
-                         `✨ Закрыто квестов сегодня: {{ completed_today }}/{{ total_habits }} ({{ progress_percent }}%)\n` +
-                         `🔥 Прокачивай привычки каждый день!`;
+            const text = `👾 Прогресс героя {{ nickname }} [ID: {{ user_id }}] в HABBY Tracker!\n` +
+                         `🛡️ Уровень: Lv.{{ player.level }}\n` +
+                         `✨ Квестов сегодня: {{ completed_today }}/{{ total_habits }} ({{ progress_percent }}%)\n` +
+                         `🔥 Присоединяйся к челленджу!`;
             navigator.clipboard.writeText(text).then(() => {
-                alert("Текст скопирован в буфер обмена! Отправь друзьям или в чат!");
+                alert("Текст скопирован в буфер обмена!");
             });
         }
 
@@ -192,41 +195,33 @@
             const canvas = document.getElementById("shareCanvas");
             const ctx = canvas.getContext("2d");
 
-            // Заливка фона
             ctx.fillStyle = "#0f380f";
             ctx.fillRect(0, 0, 600, 400);
 
-            // Рамка GameBoy
             ctx.strokeStyle = "#9bbc0f";
             ctx.lineWidth = 10;
             ctx.strokeRect(10, 10, 580, 380);
 
-            // Текст заголовка
             ctx.fillStyle = "#9bbc0f";
-            ctx.font = "20px 'Press Start 2P', monospace";
-            ctx.fillText("HABBY: RETRO TRACKER", 50, 60);
+            ctx.font = "18px 'Press Start 2P', monospace";
+            ctx.fillText("HABBY: RETRO CARD", 50, 60);
 
-            // Инфо
-            ctx.font = "14px 'Press Start 2P', monospace";
-            ctx.fillText("ГЕРОЙ: Уровень Lv.{{ player.level }}", 50, 120);
-            ctx.fillText("ПРОГРЕСС ДНЯ: {{ completed_today }}/{{ total_habits }} ({{ progress_percent }}%)", 50, 160);
-            ctx.fillText("ВСЕГО ЗАКРЫТО: {{ player.completed_total|default(0) }} КВЕСТОВ", 50, 200);
+            ctx.font = "12px 'Press Start 2P', monospace";
+            ctx.fillText("ГЕРОЙ: {{ nickname }} ({{ user_id }})", 50, 120);
+            ctx.fillText("УРОВЕНЬ: Lv.{{ player.level }}", 50, 160);
+            ctx.fillText("ПРОГРЕСС ДНЯ: {{ completed_today }}/{{ total_habits }} ({{ progress_percent }}%)", 50, 200);
 
-            // Рисуем Habby
             ctx.font = "12px monospace";
-            ctx.fillText("  (\\__/)", 380, 250);
-            ctx.fillText("  ( ^.^)", 380, 270);
-            ctx.fillText(" c(\") (\")", 380, 290);
-            ctx.fillText("Habby гордится тобой!", 50, 280);
+            ctx.fillText("  (\\__/)", 380, 240);
+            ctx.fillText("  ( ^.^)", 380, 260);
+            ctx.fillText(" c(\") (\")", 380, 280);
 
-            // Водяной знак
             ctx.font = "10px 'Press Start 2P', monospace";
             ctx.fillStyle = "#8bac0f";
-            ctx.fillText("Дисциплина: Языки и технологии программирования", 50, 350);
+            ctx.fillText("Трекер привычек • Языки и технологии программирования", 50, 350);
 
-            // Скачивание картинки
             const link = document.createElement("a");
-            link.download = "habby-card.png";
+            link.download = "habby-{{ user_id }}.png";
             link.href = canvas.toDataURL("image/png");
             link.click();
         }

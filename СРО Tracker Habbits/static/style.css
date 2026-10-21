@@ -343,3 +343,32 @@ body {
     box-shadow: none;
     transform: translate(2px, 2px);
 }
+
+/* Стили авторизации и мультипользовательского режима */
+.exit-link {
+    margin-left: auto;
+    color: #a83232;
+    text-decoration: none;
+    font-size: 8px;
+    font-weight: bold;
+}
+.exit-link:hover { text-decoration: underline; }
+
+.id-tag {
+    font-size: 8px;
+    background: var(--gb-screen-dark);
+    color: var(--gb-screen-bg);
+    padding: 2px 4px;
+}
+
+.slot-box {
+    border: 2px solid var(--gb-screen-dark);
+    padding: 10px;
+    background: var(--gb-accent);
+}
+
+.auth-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}

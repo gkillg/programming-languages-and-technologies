@@ -1,21 +1,22 @@
 """
-Веб-трекер привычек "Habby" в ретро-стиле
-Дисциплина: Языки и технология программирования
+Веб-трекер привычек "Habby" (Ретро-консоль)
+Дисциплина: Языки и технология программирования (СРО)
 """
 
 import json
 import os
 from datetime import date, timedelta
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 
 app = Flask(__name__)
-app.secret_key = "habby_secret_retro_key"
+app.secret_key = "habby_retro_secret_key"
 DATA_FILE = "habby_save.json"
 
 
 def load_game() -> dict:
+    """Загрузка данных игры из JSON с обработкой исключений (Лекция: Работа с файлами и исключения)."""
     default_state = {
-        "player": {"xp": 0, "level": 1},
+        "player": {"xp": 0, "level": 1, "completed_total": 0},
         "habits": []
     }
     if not os.path.exists(DATA_FILE):
@@ -23,12 +24,15 @@ def load_game() -> dict:
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-            return data if isinstance(data, dict) else default_state
+            if isinstance(data, dict):
+                return data
+            return default_state
     except (json.JSONDecodeError, OSError):
         return default_state
 
 
 def save_game(game_state: dict) -> None:
+    """Сохранение состояния игры в JSON."""
     try:
         with open(DATA_FILE, "w", encoding="utf-8") as f:
             json.dump(game_state, f, ensure_ascii=False, indent=4)
@@ -37,7 +41,7 @@ def save_game(game_state: dict) -> None:
 
 
 def update_streaks_on_load(habits: list) -> None:
-    """Обнуляет серии, если вчера был пропуск."""
+    """Проверка пропущенных дней (обнуление серий)."""
     today = date.today()
     yesterday_str = (today - timedelta(days=1)).isoformat()
     today_str = today.isoformat()
@@ -49,14 +53,14 @@ def update_streaks_on_load(habits: list) -> None:
 
 
 def add_xp(player: dict, amount: int) -> bool:
-    """Начисляет опыт и проверяет Level Up."""
+    """Расчет опыта и повышение уровня."""
     player["xp"] += amount
-    req_xp = player["level"] * 50
+    req_xp = player["level"] * 60
     leveled_up = False
     while player["xp"] >= req_xp:
         player["level"] += 1
         player["xp"] -= req_xp
-        req_xp = player["level"] * 50
+        req_xp = player["level"] * 60
         leveled_up = True
     return leveled_up
 
@@ -68,19 +72,32 @@ def index():
     save_game(game_state)
 
     today_str = date.today().isoformat()
-    completed_today = sum(1 for h in game_state["habits"] if h.get("last_completed") == today_str)
-    total_habits = len(game_state["habits"])
+    filter_type = request.args.get("filter", "all")
+    
+    habits = game_state["habits"]
+    completed_today = sum(1 for h in habits if h.get("last_completed") == today_str)
+    total_habits = len(habits)
+
+    # Фильтрация
+    if filter_type == "active":
+        filtered_habits = [h for h in habits if h.get("last_completed") != today_str]
+    elif filter_type == "done":
+        filtered_habits = [h for h in habits if h.get("last_completed") == today_str]
+    else:
+        filtered_habits = habits
 
     progress_percent = int((completed_today / total_habits) * 100) if total_habits > 0 else 0
 
     return render_template(
         "index.html",
         player=game_state["player"],
-        habits=game_state["habits"],
+        habits=filtered_habits,
+        raw_habits=habits,
         today=today_str,
         progress_percent=progress_percent,
         completed_today=completed_today,
-        total_habits=total_habits
+        total_habits=total_habits,
+        current_filter=filter_type
     )
 
 
@@ -93,7 +110,7 @@ def add_habit():
 
     game_state = load_game()
     if any(h["name"].lower() == name.lower() for h in game_state["habits"]):
-        flash("Такой квест уже есть в свитке!", "error")
+        flash("Такой квест уже записан!", "error")
         return redirect(url_for("index"))
 
     game_state["habits"].append({
@@ -103,10 +120,10 @@ def add_habit():
         "last_completed": None
     })
 
-    if add_xp(game_state["player"], 10):
-        flash(f"Квест добавлен! (+10 XP). LEVEL UP! Твой уровень: Lv.{game_state['player']['level']}!", "success")
+    if add_xp(game_state["player"], 15):
+        flash(f"Квест создан! (+15 XP). LEVEL UP! Твой уровень: Lv.{game_state['player']['level']}!", "levelup")
     else:
-        flash(f"Квест «{name}» добавлен в свиток! (+10 XP)", "success")
+        flash(f"Квест «{name}» добавлен в свиток! (+15 XP)", "success")
 
     save_game(game_state)
     return redirect(url_for("index"))
@@ -123,7 +140,7 @@ def complete_habit(habit_id: int):
         yesterday_str = (date.today() - timedelta(days=1)).isoformat()
 
         if h.get("last_completed") == today_str:
-            flash("Этот квест уже выполнен сегодня!", "info")
+            flash("Квест уже выполнен сегодня!", "info")
             return redirect(url_for("index"))
 
         if h.get("last_completed") == yesterday_str:
@@ -135,15 +152,16 @@ def complete_habit(habit_id: int):
             h["best_streak"] = h["streak"]
 
         h["last_completed"] = today_str
-        reward = 25 + (h["streak"] * 5)
+        game_state["player"]["completed_total"] = game_state["player"].get("completed_total", 0) + 1
 
+        reward = 30 + (h["streak"] * 5)
         lvl_up = add_xp(game_state["player"], reward)
         save_game(game_state)
 
         if lvl_up:
-            flash(f"Победа! «{h['name']}» выполнен! Комбо: x{h['streak']}. (+{reward} XP). НОВЫЙ УРОВЕНЬ: Lv.{game_state['player']['level']}!", "success")
+            flash(f"ПОБЕДА! «{h['name']}» закрыт! (+{reward} XP). LEVEL UP!", "levelup")
         else:
-            flash(f"Победа! «{h['name']}» выполнен! Комбо: x{h['streak']}. Получено +{reward} XP!", "success")
+            flash(f"Победа! «{h['name']}» выполнен! Комбо: x{h['streak']} (+{reward} XP)", "success")
 
     return redirect(url_for("index"))
 

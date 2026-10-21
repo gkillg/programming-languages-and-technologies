@@ -3,112 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HABBY - Retro Habit Tracker</title>
-    <!-- Пиксельный шрифт от Google Fonts -->
+    <title>HABBY - 8-Bit Pixel Game Console</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="retro-container">
-        
-        <!-- Верхний экран (HUD) -->
-        <header class="retro-box hud">
-            <h1 class="glitch">👾 HABBY TRACKER</h1>
-            <div class="player-stats">
-                <p>ГЕРОЙ: <span class="highlight">Lv.{{ player.level }}</span></p>
-                <div class="bar-container">
-                    <span class="bar-label">EXP:</span>
-                    <div class="bar-border">
-                        <div class="bar-fill exp" style="width: {{ (player.xp / (player.level * 50)) * 100 }}%;"></div>
+
+    <!-- Корпус Ретро-Консоли -->
+    <div class="console-body">
+        <div class="console-header">
+            <span class="power-led"></span> POWER
+            <span class="brand">HABBY-BOY COLOR</span>
+        </div>
+
+        <!-- Экран консоли со стеклом и сканлайнами -->
+        <div class="screen-frame">
+            <div class="screen-glass">
+
+                <!-- HUD Игрока -->
+                <header class="hud-box">
+                    <div class="hud-top">
+                        <span class="player-tag">HERO: <strong class="glow">Lv.{{ player.level }}</strong></span>
+                        <span class="total-tag">CLOSED: {{ player.completed_total|default(0) }}</span>
                     </div>
-                    <span class="bar-num">{{ player.xp }}/{{ player.level * 50 }}</span>
-                </div>
-            </div>
-        </header>
+                    <div class="stat-row">
+                        <span class="stat-name">EXP:</span>
+                        <div class="pixel-bar">
+                            <div class="pixel-fill exp-fill" style="width: {{ (player.xp / (player.level * 60)) * 100 }}%;"></div>
+                        </div>
+                        <span class="stat-count">{{ player.xp }}/{{ player.level * 60 }}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">DAY:</span>
+                        <div class="pixel-bar">
+                            <div class="pixel-fill hp-fill" style="width: {{ progress_percent }}%;"></div>
+                        </div>
+                        <span class="stat-count">{{ progress_percent }}%</span>
+                    </div>
+                </header>
 
-        <!-- Питомец Habby -->
-        <section class="retro-box pet-box">
-            <div class="pet-avatar">
-                <pre>
+                <!-- Интерактивный питомец Habby -->
+                <section class="pet-screen">
+                    <div class="pixel-pet-art" id="petArt">
+                        <pre>
   (\__/)
-  ( ^.^)
+  ( ^.^) ~♥
  c(") (")
-                </pre>
-            </div>
-            <div class="pet-dialog">
-                <p class="dialog-text">
-                    {% if completed_today == total_habits and total_habits > 0 %}
-                        "НЕВЕРОЯТНО! Все квесты закрыты! Ты легенда!"
-                    {% elif completed_today > 0 %}
-                        "Отличная работа! Давай продолжим серию!"
-                    {% else %}
-                        "Пип-боп! Время прокачать свои привычки!"
+                        </pre>
+                    </div>
+                    <div class="speech-bubble">
+                        <p id="petPhrase">
+                            {% if completed_today == total_habits and total_habits > 0 %}
+                                "ИДЕАЛЬНО! Все квесты закрыты! Ты истинный паладин!"
+                            {% elif completed_today > 0 %}
+                                "Отличный темп! Жми дальше, не сбивай серию!"
+                            {% else %}
+                                "Пип! Habby ждет подвигов! Закрой хотя бы один квест!"
+                            {% endif %}
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Сообщения системы -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="retro-alert {{ category }}">> {{ message }}</div>
+                        {% endfor %}
                     {% endif %}
-                </p>
-            </div>
-        </section>
+                {% endwith %}
 
-        <!-- Системные уведомления -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="messages">
-                    {% for category, message in messages %}
-                        <div class="msg {{ category }}">> {{ message }}</div>
-                    {% endfor %}
+                <!-- Ввод новой привычки -->
+                <form action="{{ url_for('add_habit') }}" method="POST" class="add-quest-form">
+                    <input type="text" name="name" placeholder="Новый квест..." required autocomplete="off" class="pixel-input">
+                    <button type="submit" class="pixel-btn btn-primary" onclick="playBeep()">+ КВЕСТ</button>
+                </form>
+
+                <!-- Фильтры квестов -->
+                <div class="filter-tabs">
+                    <a href="{{ url_for('index', filter='all') }}" class="tab {% if current_filter == 'all' %}active{% endif %}">ВСЕ ({{ total_habits }})</a>
+                    <a href="{{ url_for('index', filter='active') }}" class="tab {% if current_filter == 'active' %}active{% endif %}">В ПРОЦЕССЕ</a>
+                    <a href="{{ url_for('index', filter='done') }}" class="tab {% if current_filter == 'done' %}active{% endif %}">ГОТОВО</a>
                 </div>
-            {% endif %}
-        {% endwith %}
 
-        <!-- Дневной прогресс -->
-        <section class="retro-box day-progress">
-            <div class="bar-container">
-                <span class="bar-label">ДЕНЬ:</span>
-                <div class="bar-border">
-                    <div class="bar-fill hp" style="width: {{ progress_percent }}%;"></div>
-                </div>
-                <span class="bar-num">{{ completed_today }}/{{ total_habits }} ({{ progress_percent }}%)</span>
-            </div>
-        </section>
-
-        <!-- Форма добавления привычки -->
-        <section class="retro-box add-box">
-            <form action="{{ url_for('add_habit') }}" method="POST" class="add-form">
-                <input type="text" name="name" placeholder="Новый квест (привычка)..." required autocomplete="off" class="retro-input">
-                <button type="submit" class="retro-btn btn-add">+ СОЗДАТЬ</button>
-            </form>
-        </section>
-
-        <!-- Список привычек -->
-        <section class="retro-box habit-list-box">
-            <h2>📜 ЖУРНАЛ КВЕСТОВ</h2>
-            {% if habits %}
-                <ul class="habit-list">
-                    {% for h in habits %}
-                    <li class="habit-card {% if h.last_completed == today %}done{% endif %}">
-                        <div class="habit-info">
-                            <span class="habit-name">{{ h.name }}</span>
-                            <div class="habit-badges">
-                                <span class="badge combo">КОМБО: x{{ h.streak }}</span>
-                                <span class="badge record">РЕКОРД: {{ h.best_streak }}</span>
+                <!-- Список привычек -->
+                <div class="quest-log">
+                    {% if habits %}
+                        {% for h in habits %}
+                        <div class="quest-item {% if h.last_completed == today %}quest-done{% endif %}">
+                            <div class="quest-left">
+                                <span class="quest-title">{{ h.name }}</span>
+                                <div class="quest-tags">
+                                    <span class="tag combo">КОМБО: x{{ h.streak }}</span>
+                                    <span class="tag best">РЕКОРД: {{ h.best_streak }}</span>
+                                </div>
+                            </div>
+                            <div class="quest-right">
+                                {% if h.last_completed == today %}
+                                    <span class="done-stamp">✔ ЗАКРЫТ</span>
+                                {% else %}
+                                    <a href="{{ url_for('complete_habit', habit_id=loop.index0) }}" class="pixel-btn btn-success" onclick="playSuccessSound()">ВЫПОЛНИТЬ</a>
+                                {% endif %}
+                                <a href="{{ url_for('reset_habit', habit_id=loop.index0) }}" class="pixel-btn btn-warn" title="Сбросить комбо">0</a>
+                                <a href="{{ url_for('delete_habit', habit_id=loop.index0) }}" class="pixel-btn btn-danger" title="Удалить">X</a>
                             </div>
                         </div>
-                        <div class="habit-actions">
-                            {% if h.last_completed == today %}
-                                <span class="btn-done">✔ СДЕЛАНО</span>
-                            {% else %}
-                                <a href="{{ url_for('complete_habit', habit_id=loop.index0) }}" class="retro-btn btn-action">ВЫПОЛНИТЬ</a>
-                            {% endif %}
-                            <a href="{{ url_for('reset_habit', habit_id=loop.index0) }}" class="retro-btn btn-reset" title="Сбросить серию">🔄</a>
-                            <a href="{{ url_for('delete_habit', habit_id=loop.index0) }}" class="retro-btn btn-del" title="Удалить">✖</a>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="empty-text">Журнал пуст. Добавь свою первую цель выше!</p>
-            {% endif %}
-        </section>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-log">В этой вкладке пусто!</div>
+                    {% endif %}
+                </div>
 
+                <!-- Блок «Поделиться результатами» -->
+                <section class="share-box">
+                    <div class="share-title">⚡ ПОДЕЛИСЬ УСПЕХАМИ ⚡</div>
+                    <div class="share-buttons">
+                        <button class="pixel-btn btn-share" onclick="generateShareCard()">💾 СКАЧАТЬ КАРТОЧКУ</button>
+                        <button class="pixel-btn btn-share" onclick="copyShareText()">📋 СКОПИРОВАТЬ ТЕКСТ</button>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <!-- Нижняя панель консоли с декоративными кнопками -->
+        <div class="console-controls">
+            <div class="d-pad">
+                <div class="d-up"></div>
+                <div class="d-left"></div>
+                <div class="d-center"></div>
+                <div class="d-right"></div>
+                <div class="d-down"></div>
+            </div>
+            <div class="action-buttons">
+                <div class="btn-round" title="Кнопка B">B</div>
+                <div class="btn-round" title="Кнопка A">A</div>
+            </div>
+        </div>
     </div>
+
+    <!-- Скрытый холст для генерации графической карточки -->
+    <canvas id="shareCanvas" width="600" height="400" style="display:none;"></canvas>
+
+    <!-- 8-битный звук и скрипты шаринга -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playBeep() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "square";
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+        }
+
+        function playSuccessSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.18);
+        }
+
+        function copyShareText() {
+            playBeep();
+            const text = `👾 Мой прогресс в HABBY Tracker!\n` +
+                         `🛡️ Герой: Уровень Lv.{{ player.level }}\n` +
+                         `✨ Закрыто квестов сегодня: {{ completed_today }}/{{ total_habits }} ({{ progress_percent }}%)\n` +
+                         `🔥 Прокачивай привычки каждый день!`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Текст скопирован в буфер обмена! Отправь друзьям или в чат!");
+            });
+        }
+
+        function generateShareCard() {
+            playSuccessSound();
+            const canvas = document.getElementById("shareCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Заливка фона
+            ctx.fillStyle = "#0f380f";
+            ctx.fillRect(0, 0, 600, 400);
+
+            // Рамка GameBoy
+            ctx.strokeStyle = "#9bbc0f";
+            ctx.lineWidth = 10;
+            ctx.strokeRect(10, 10, 580, 380);
+
+            // Текст заголовка
+            ctx.fillStyle = "#9bbc0f";
+            ctx.font = "20px 'Press Start 2P', monospace";
+            ctx.fillText("HABBY: RETRO TRACKER", 50, 60);
+
+            // Инфо
+            ctx.font = "14px 'Press Start 2P', monospace";
+            ctx.fillText("ГЕРОЙ: Уровень Lv.{{ player.level }}", 50, 120);
+            ctx.fillText("ПРОГРЕСС ДНЯ: {{ completed_today }}/{{ total_habits }} ({{ progress_percent }}%)", 50, 160);
+            ctx.fillText("ВСЕГО ЗАКРЫТО: {{ player.completed_total|default(0) }} КВЕСТОВ", 50, 200);
+
+            // Рисуем Habby
+            ctx.font = "12px monospace";
+            ctx.fillText("  (\\__/)", 380, 250);
+            ctx.fillText("  ( ^.^)", 380, 270);
+            ctx.fillText(" c(\") (\")", 380, 290);
+            ctx.fillText("Habby гордится тобой!", 50, 280);
+
+            // Водяной знак
+            ctx.font = "10px 'Press Start 2P', monospace";
+            ctx.fillStyle = "#8bac0f";
+            ctx.fillText("Дисциплина: Языки и технологии программирования", 50, 350);
+
+            // Скачивание картинки
+            const link = document.createElement("a");
+            link.download = "habby-card.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        }
+    </script>
 </body>
 </html>

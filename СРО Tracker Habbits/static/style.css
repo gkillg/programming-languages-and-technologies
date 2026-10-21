@@ -1,8 +1,11 @@
 :root {
-    --bg-color: #0f380f;       /* Зеленая палитра классического Game Boy */
-    --box-bg: #306230;
-    --light-color: #9bbc0f;
-    --accent-color: #8bac0f;
+    --gb-bg: #8b956d;
+    --gb-screen-bg: #9bbc0f;
+    --gb-screen-dark: #0f380f;
+    --gb-screen-mid: #306230;
+    --gb-accent: #8bac0f;
+    --console-body: #c4bebb;
+    --btn-purple: #8b1d5c;
     --font: 'Press Start 2P', monospace;
 }
 
@@ -13,173 +16,330 @@
 }
 
 body {
-    background-color: var(--bg-color);
+    background: #1a1a24;
     font-family: var(--font);
-    color: var(--light-color);
-    padding: 20px;
-    font-size: 11px;
-    line-height: 1.5;
-}
-
-.retro-container {
-    max-width: 650px;
-    margin: 0 auto;
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    justify-content: center;
+    padding: 20px 10px;
+    color: var(--gb-screen-dark);
 }
 
-.retro-box {
-    background-color: var(--box-bg);
-    border: 4px solid var(--light-color);
+/* Корпус консоли */
+.console-body {
+    background: var(--console-body);
+    width: 100%;
+    max-width: 550px;
+    border-radius: 15px 15px 50px 15px;
+    padding: 25px 20px 40px;
+    box-shadow: 0 10px 0 #8f8885, 0 15px 30px rgba(0,0,0,0.7);
+    border: 3px solid #dedede;
+}
+
+.console-header {
+    display: flex;
+    align-items: center;
+    font-size: 9px;
+    color: #666;
+    margin-bottom: 15px;
+    gap: 8px;
+}
+
+.power-led {
+    width: 10px;
+    height: 10px;
+    background: #ff3b30;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ff3b30;
+    display: inline-block;
+}
+
+.brand {
+    font-weight: bold;
+    font-style: italic;
+    letter-spacing: 1px;
+}
+
+/* Экран */
+.screen-frame {
+    background: #545b63;
+    padding: 25px 20px;
+    border-radius: 10px 10px 35px 10px;
+    box-shadow: inset 0 0 10px #000;
+}
+
+.screen-glass {
+    background: var(--gb-screen-bg);
+    border: 3px solid var(--gb-screen-dark);
     padding: 15px;
-    box-shadow: 4px 4px 0px #000;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.4);
+    min-height: 480px;
+    position: relative;
 }
 
-h1 {
-    font-size: 16px;
-    text-align: center;
+/* Эффект сканлайнов старого монитора */
+.screen-glass::after {
+    content: " ";
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+}
+
+/* HUD */
+.hud-box {
+    border: 2px solid var(--gb-screen-dark);
+    padding: 10px;
+    background: var(--gb-accent);
     margin-bottom: 12px;
 }
 
-h2 {
-    font-size: 12px;
-    margin-bottom: 15px;
-    border-bottom: 2px dashed var(--light-color);
-    padding-bottom: 5px;
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    margin-bottom: 6px;
 }
 
-/* Полоски EXP и прогресса */
-.bar-container {
+.stat-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 5px;
+    font-size: 8px;
+    margin-top: 4px;
+    gap: 6px;
 }
 
-.bar-border {
+.stat-name { width: 35px; }
+.stat-count { width: 65px; text-align: right; }
+
+.pixel-bar {
     flex-grow: 1;
-    height: 16px;
-    background: #0f380f;
-    border: 2px solid var(--light-color);
+    height: 10px;
+    border: 1px solid var(--gb-screen-dark);
+    background: var(--gb-screen-dark);
     padding: 1px;
 }
 
-.bar-fill {
-    height: 100%;
-}
+.pixel-fill { height: 100%; }
+.exp-fill { background: #e6b800; }
+.hp-fill { background: var(--gb-screen-bg); }
 
-.bar-fill.exp { background-color: #e0ac00; }
-.bar-fill.hp { background-color: var(--light-color); }
-
-/* Питомец */
-.pet-box {
+/* Питомец Habby */
+.pet-screen {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
+    margin-bottom: 12px;
+    background: var(--gb-accent);
+    border: 2px solid var(--gb-screen-dark);
+    padding: 8px;
 }
 
-.pet-avatar pre {
-    font-size: 12px;
-    line-height: 1.2;
-    color: var(--light-color);
-}
-
-.pet-dialog {
-    background: #0f380f;
-    border: 2px solid var(--light-color);
-    padding: 10px;
-    border-radius: 4px;
-    flex-grow: 1;
-}
-
-/* Кнопки и формы */
-.retro-input {
-    flex-grow: 1;
-    font-family: var(--font);
+.pixel-pet-art pre {
     font-size: 10px;
-    padding: 10px;
-    background: #0f380f;
-    border: 2px solid var(--light-color);
-    color: var(--light-color);
+    line-height: 1.1;
+    font-weight: bold;
+    animation: bounce 1.2s infinite alternate ease-in-out;
 }
 
-.add-form {
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-4px); }
+}
+
+.speech-bubble {
+    font-size: 8px;
+    line-height: 1.4;
+    border-left: 2px dashed var(--gb-screen-dark);
+    padding-left: 10px;
+}
+
+/* Оповещения */
+.retro-alert {
+    padding: 6px;
+    font-size: 8px;
+    margin-bottom: 10px;
+    border: 1px solid var(--gb-screen-dark);
+    background: var(--gb-screen-dark);
+    color: var(--gb-screen-bg);
+}
+.retro-alert.levelup {
+    background: #e6b800;
+    color: #000;
+}
+
+/* Форма */
+.add-quest-form {
     display: flex;
-    gap: 10px;
+    gap: 6px;
+    margin-bottom: 12px;
 }
 
-.retro-btn {
+.pixel-input {
+    flex-grow: 1;
     font-family: var(--font);
-    font-size: 10px;
-    padding: 10px 12px;
-    cursor: pointer;
-    background: var(--light-color);
-    color: #0f380f;
+    font-size: 9px;
+    padding: 8px;
+    background: var(--gb-accent);
+    border: 2px solid var(--gb-screen-dark);
+    color: var(--gb-screen-dark);
+    outline: none;
+}
+
+.pixel-btn {
+    font-family: var(--font);
+    font-size: 8px;
+    padding: 8px 10px;
+    background: var(--gb-screen-dark);
+    color: var(--gb-screen-bg);
     border: none;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #000;
     text-decoration: none;
     display: inline-block;
-    box-shadow: 2px 2px 0 #000;
 }
 
-.retro-btn:active {
+.pixel-btn:active {
     transform: translate(2px, 2px);
     box-shadow: none;
 }
 
-.btn-del { background: #b83838; color: #fff; }
-.btn-reset { background: #d08828; color: #fff; }
-.btn-done {
-    color: var(--light-color);
-    font-size: 9px;
-    padding: 10px;
-    border: 1px solid var(--light-color);
+.btn-success { background: var(--gb-screen-mid); color: #fff; }
+.btn-warn { background: #a67c00; color: #fff; }
+.btn-danger { background: #8a2020; color: #fff; }
+
+/* Фильтры */
+.filter-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.tab {
+    font-size: 7px;
+    padding: 5px 6px;
+    text-decoration: none;
+    color: var(--gb-screen-dark);
+    border: 1px solid var(--gb-screen-dark);
+}
+
+.tab.active {
+    background: var(--gb-screen-dark);
+    color: var(--gb-screen-bg);
 }
 
 /* Список */
-.habit-list {
-    list-style: none;
+.quest-log {
+    max-height: 250px;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
+    margin-bottom: 15px;
 }
 
-.habit-card {
-    background: #1b471b;
-    border: 2px solid var(--light-color);
-    padding: 10px;
+.quest-item {
+    border: 2px solid var(--gb-screen-dark);
+    background: var(--gb-accent);
+    padding: 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.habit-card.done {
+.quest-item.quest-done {
     opacity: 0.6;
 }
 
-.habit-name {
-    font-size: 11px;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.badge {
+.quest-title {
     font-size: 8px;
-    background: #0f380f;
-    padding: 3px 6px;
-    border: 1px solid var(--accent-color);
-    margin-right: 5px;
+    display: block;
+    margin-bottom: 4px;
 }
 
-.messages {
-    background: #0f380f;
-    border: 2px solid var(--light-color);
-    padding: 10px;
-    color: #fff;
-    font-size: 9px;
+.quest-tags .tag {
+    font-size: 6px;
+    border: 1px solid var(--gb-screen-dark);
+    padding: 2px 4px;
+    margin-right: 4px;
 }
 
-.empty-text {
+.done-stamp {
+    font-size: 7px;
+    font-weight: bold;
+    padding: 4px;
+}
+
+/* Шаринг */
+.share-box {
+    border-top: 2px dashed var(--gb-screen-dark);
+    padding-top: 10px;
     text-align: center;
-    padding: 20px 0;
+}
+
+.share-title {
+    font-size: 8px;
+    margin-bottom: 8px;
+}
+
+.share-buttons {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.btn-share {
+    background: var(--gb-screen-mid);
+    color: #fff;
+}
+
+/* Элементы управления консоли */
+.console-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+.d-pad {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.d-center, .d-up, .d-down, .d-left, .d-right {
+    background: #333;
+    position: absolute;
+    box-shadow: 1px 1px 2px #000;
+}
+.d-center { width: 26px; height: 26px; top: 27px; left: 27px; }
+.d-up { width: 26px; height: 27px; top: 0; left: 27px; border-radius: 3px 3px 0 0; }
+.d-down { width: 26px; height: 27px; bottom: 0; left: 27px; border-radius: 0 0 3px 3px; }
+.d-left { width: 27px; height: 26px; top: 27px; left: 0; border-radius: 3px 0 0 3px; }
+.d-right { width: 27px; height: 26px; top: 27px; right: 0; border-radius: 0 3px 3px 0; }
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    transform: rotate(-25deg);
+}
+
+.btn-round {
+    width: 40px;
+    height: 40px;
+    background: var(--btn-purple);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    box-shadow: 2px 2px 0 #000;
+    cursor: pointer;
+}
+.btn-round:active {
+    box-shadow: none;
+    transform: translate(2px, 2px);
 }

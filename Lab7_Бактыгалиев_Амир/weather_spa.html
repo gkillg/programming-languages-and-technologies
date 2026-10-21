@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeatherView SPA — Прогноз погоды</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: #0b1329; color: #f8fafc; min-height: 100vh; padding: 24px 16px; display: flex; justify-content: center; }
+    .spa-card { background: #131f37; border: 1px solid #1e293b; border-radius: 20px; padding: 26px; width: 100%; max-width: 620px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+    header { text-align: center; margin-bottom: 20px; }
+    h1 { font-size: 22px; color: #38bdf8; }
+    .city-nav { display: flex; gap: 8px; justify-content: center; margin: 16px 0; flex-wrap: wrap; }
+    .city-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .city-btn.active { background: #0284c7; color: #fff; border-color: #0284c7; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .weather-hero { background: linear-gradient(135deg, #0284c7, #0369a1); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(2,132,199,0.3); }
+    .hero-temp { font-size: 48px; font-weight: 800; margin: 8px 0; }
+    .hero-cond { font-size: 16px; opacity: 0.9; }
+    .hero-meta { display: flex; justify-content: space-around; margin-top: 16px; font-size: 13px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 12px; }
+    .forecast-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .forecast-col { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 12px 6px; text-align: center; }
+    .col-day { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+    .col-icon { font-size: 20px; margin: 4px 0; }
+    .col-temp { font-size: 14px; font-weight: 600; color: #38bdf8; }
+  </style>
+</head>
+<body>
+  <div class="spa-card">
+    <header>
+      <h1>🌤 WeatherView SPA</h1>
+      <p style="color: #94a3b8; font-size: 13px;">Одностраничное приложение прогноза погоды (Вариант 13)</p>
+      <nav class="city-nav">
+        <button class="city-btn active" data-city="moscow">Москва</button>
+        <button class="city-btn" data-city="almaty">Алматы</button>
+        <button class="city-btn" data-city="astana">Астана</button>
+        <button class="city-btn" data-city="spb">Санкт-Петербург</button>
+      </nav>
+    </header>
+
+    <main id="weatherContainer"></main>
+  </div>
+
+  <script>
+    const weatherDb = {
+      moscow: {
+        name: "Москва",
+        temp: "+16°C",
+        cond: "Переменная облачность",
+        icon: "⛅",
+        wind: "3.8 м/с",
+        humidity: "62%",
+        forecast: [
+          { day: "Пн", icon: "🌤", temp: "+17°" },
+          { day: "Вт", icon: "🌧", temp: "+14°" },
+          { day: "Ср", icon: "⛅", temp: "+15°" },
+          { day: "Чт", icon: "☀️", temp: "+19°" },
+          { day: "Пт", icon: "🌤", temp: "+18°" }
+        ]
+      },
+      almaty: {
+        name: "Алматы",
+        temp: "+22°C",
+        cond: "Ясно, солнечно",
+        icon: "☀️",
+        wind: "2.1 м/с",
+        humidity: "45%",
+        forecast: [
+          { day: "Пн", icon: "☀️", temp: "+23°" },
+          { day: "Вт", icon: "☀️", temp: "+24°" },
+          { day: "Ср", icon: "🌤", temp: "+22°" },
+          { day: "Чт", icon: "⛅", temp: "+20°" },
+          { day: "Пт", icon: "☀️", temp: "+25°" }
+        ]
+      },
+      astana: {
+        name: "Астана",
+        temp: "+11°C",
+        cond: "Свежий ветер",
+        icon: "💨",
+        wind: "7.4 м/с",
+        humidity: "50%",
+        forecast: [
+          { day: "Пн", icon: "⛅", temp: "+12°" },
+          { day: "Вт", icon: "🌧", temp: "+9°" },
+          { day: "Ср", icon: "🌤", temp: "+13°" },
+          { day: "Чт", icon: "☀️", temp: "+15°" },
+          { day: "Пт", icon: "💨", temp: "+11°" }
+        ]
+      },
+      spb: {
+        name: "Санкт-Петербург",
+        temp: "+13°C",
+        cond: "Небольшой дождь",
+        icon: "🌧",
+        wind: "5.2 м/с",
+        humidity: "82%",
+        forecast: [
+          { day: "Пн", icon: "🌧", temp: "+12°" },
+          { day: "Вт", icon: "⛅", temp: "+14°" },
+          { day: "Ср", icon: "🌧", temp: "+11°" },
+          { day: "Чт", icon: "🌤", temp: "+15°" },
+          { day: "Пт", icon: "⛅", temp: "+14°" }
+        ]
+      }
+    };
+
+    const container = document.getElementById('weatherContainer');
+    const buttons = document.querySelectorAll('.city-btn');
+
+    function renderCity(cityKey) {
+      const data = weatherDb[cityKey];
+      if (!data) return;
+
+      container.innerHTML = `
+        <div class="weather-hero">
+          <div style="font-size: 32px;">${data.icon}</div>
+          <div class="hero-temp">${data.temp}</div>
+          <div class="hero-cond">${data.cond} — ${data.name}</div>
+          <div class="hero-meta">
+            <span>💨 Ветер: ${data.wind}</span>
+            <span>💧 Влажность: ${data.humidity}</span>
+          </div>
+        </div>
+
+        <h3 style="font-size: 14px; color: #94a3b8; margin-bottom: 10px;">Прогноз на 5 дней</h3>
+        <div class="forecast-grid">
+          ${data.forecast.map(f => `
+            <div class="forecast-col">
+              <div class="col-day">${f.day}</div>
+              <div class="col-icon">${f.icon}</div>
+              <div class="col-temp">${f.temp}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCity(btn.dataset.city);
+      });
+    });
+
+    renderCity('moscow');
+  </script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Корзина покупок — JSON Storage</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 24px 16px; display: flex; justify-content: center; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; width: 100%; max-width: 560px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h2 { color: #38bdf8; font-size: 20px; text-align: center; margin-bottom: 4px; }
+    .sub { color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 18px; }
+    .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+    .catalog-item { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .catalog-item button { background: #0284c7; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .cart-section { border-top: 1px solid #334155; padding-top: 16px; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #334155; font-size: 13px; }
+    .qty-btn { background: #334155; color: #fff; border: none; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .total-box { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold; color: #4ade80; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🛍 Корзина интернет-магазина</h2>
+    <p class="sub">Лабораторная работа №8 (Вариант 11) · Расчет итога и localStorage</p>
+
+    <h3 style="font-size:13px; color:#94a3b8; margin-bottom:8px;">Доступные товары:</h3>
+    <div class="catalog" id="catalog"></div>
+
+    <div class="cart-section">
+      <h3 style="font-size:14px; color:#38bdf8; margin-bottom:8px;">Ваша корзина:</h3>
+      <div id="cartList"></div>
+      <div class="total-box">
+        <span>Общая сумма:</span>
+        <span id="cartTotal">0 ₽</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CATALOG = [
+      { id: 1, title: 'Клавиатура Mechanical', price: 4200 },
+      { id: 2, title: 'Мышь Беспроводная', price: 2100 },
+      { id: 3, title: 'Наушники Studio', price: 5800 },
+      { id: 4, title: 'Коврик для мыши XL', price: 900 }
+    ];
+
+    const KEY = 'lab8_cart_state';
+    let cart = {};
+
+    try {
+      cart = JSON.parse(localStorage.getItem(KEY) || '{}');
+      if (typeof cart !== 'object' || cart === null) cart = {};
+    } catch { cart = {}; }
+
+    const catalogEl = document.getElementById('catalog');
+    const cartListEl = document.getElementById('cartList');
+    const cartTotalEl = document.getElementById('cartTotal');
+
+    function renderCatalog() {
+      catalogEl.innerHTML = CATALOG.map(p => `
+        <div class="catalog-item">
+          <div>
+            <div style="font-weight:600; font-size:13px;">${p.title}</div>
+            <div style="color:#94a3b8; font-size:12px;">${p.price.toLocaleString()} ₽</div>
+          </div>
+          <button onclick="addToCart(${p.id})">+ Купить</button>
+        </div>
+      `).join('');
+    }
+
+    window.addToCart = function(id) {
+      cart[id] = (cart[id] || 0) + 1;
+      save();
+    };
+
+    window.changeQty = function(id, delta) {
+      if (!cart[id]) return;
+      cart[id] += delta;
+      if (cart[id] <= 0) delete cart[id];
+      save();
+    };
+
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify(cart));
+      renderCart();
+    }
+
+    function renderCart() {
+      const ids = Object.keys(cart);
+      if (ids.length === 0) {
+        cartListEl.innerHTML = '<div style="color:#64748b; font-size:13px; text-align:center; padding:12px;">Корзина пуста</div>';
+        cartTotalEl.textContent = '0 ₽';
+        return;
+      }
+
+      let total = 0;
+      cartListEl.innerHTML = ids.map(idStr => {
+        const item = CATALOG.find(p => p.id === parseInt(idStr));
+        if (!item) return '';
+        const qty = cart[idStr];
+        const subtotal = item.price * qty;
+        total += subtotal;
+        return `
+          <div class="cart-item">
+            <span>${item.title} (${item.price} ₽)</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+              <span>${qty} шт.</span>
+              <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+              <strong style="color:#38bdf8; min-width:65px; text-align:right;">${subtotal.toLocaleString()} ₽</strong>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      cartTotalEl.textContent = total.toLocaleString() + ' ₽';
+    }
+
+    renderCatalog();
+    renderCart();
+  </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>To-Do Трекер — JSON & Storage</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: #0b1329; color: #f8fafc; min-height: 100vh; padding: 24px 16px; display: flex; justify-content: center; }
+    .card { background: #131f37; border: 1px solid #1e293b; border-radius: 16px; padding: 24px; width: 100%; max-width: 520px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h2 { color: #38bdf8; font-size: 20px; text-align: center; margin-bottom: 4px; }
+    .sub { color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 18px; }
+    .input-box { display: flex; gap: 8px; margin-bottom: 14px; }
+    input[type="text"] { flex: 1; padding: 10px 14px; background: #0b1329; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+    input[type="text"]:focus { border-color: #38bdf8; }
+    .btn-add { background: #0284c7; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .filters { display: flex; gap: 6px; margin-bottom: 14px; justify-content: center; }
+    .filter-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+    .filter-btn.active { background: #0284c7; color: white; border-color: #0284c7; font-weight: 600; }
+    .tasks-list { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto; }
+    .task-item { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; display: flex; align-items: center; justify-content: space-between; }
+    .task-item.done span { text-decoration: line-through; color: #64748b; }
+    .task-text { font-size: 14px; flex: 1; margin-left: 10px; cursor: pointer; }
+    .btn-del { background: transparent; border: none; color: #f87171; cursor: pointer; font-size: 18px; padding: 0 4px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>📋 To-Do Менеджер задач</h2>
+    <p class="sub">Лабораторная работа №8 (Вариант 8) · JSON массив объектов в localStorage</p>
+
+    <div class="input-box">
+      <input type="text" id="taskInput" placeholder="Название новой задачи...">
+      <button class="btn-add" id="addBtn">Добавить</button>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">Все</button>
+      <button class="filter-btn" data-filter="active">В процессе</button>
+      <button class="filter-btn" data-filter="completed">Выполненные</button>
+    </div>
+
+    <ul class="tasks-list" id="tasksList"></ul>
+  </div>
+
+  <script>
+    const KEY = 'lab8_todo_tasks';
+    let tasks = [];
+    let filter = 'all';
+
+    try {
+      tasks = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if (!Array.isArray(tasks)) tasks = [];
+    } catch { tasks = []; }
+
+    const input = document.getElementById('taskInput');
+    const addBtn = document.getElementById('addBtn');
+    const list = document.getElementById('tasksList');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify(tasks));
+      render();
+    }
+
+    function render() {
+      list.innerHTML = '';
+      const filtered = tasks.filter(t => {
+        if (filter === 'active') return !t.completed;
+        if (filter === 'completed') return t.completed;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<li style="text-align:center; color:#64748b; padding:16px;">Задач не найдено</li>';
+        return;
+      }
+
+      filtered.forEach((task, idx) => {
+        const li = document.createElement('li');
+        li.className = 'task-item' + (task.completed ? ' done' : '');
+
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.checked = task.completed;
+        chk.addEventListener('change', () => {
+          task.completed = chk.checked;
+          save();
+        });
+
+        const span = document.createElement('span');
+        span.className = 'task-text';
+        span.textContent = task.title;
+
+        const del = document.createElement('button');
+        del.className = 'btn-del';
+        del.innerHTML = '&times;';
+        del.addEventListener('click', () => {
+          const origIdx = tasks.findIndex(t => t.id === task.id);
+          if (origIdx !== -1) tasks.splice(origIdx, 1);
+          save();
+        });
+
+        li.appendChild(chk);
+        li.appendChild(span);
+        li.appendChild(del);
+        list.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const text = input.value.trim();
+      if (!text) return;
+      tasks.unshift({ id: Date.now(), title: text, completed: false });
+      input.value = '';
+      save();
+    }
+
+    addBtn.addEventListener('click', addTask);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>

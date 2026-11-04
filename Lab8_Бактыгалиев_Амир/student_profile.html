@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Персональная анкета — localStorage</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 24px 16px; display: flex; justify-content: center; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h2 { color: #38bdf8; font-size: 20px; text-align: center; margin-bottom: 4px; }
+    .sub { color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+    input:focus, select:focus { border-color: #38bdf8; }
+    .status-msg { min-height: 20px; font-size: 12px; color: #4ade80; text-align: center; margin-bottom: 12px; }
+    .btn-row { display: flex; gap: 8px; }
+    button { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+    .btn-save { background: #0284c7; color: white; }
+    .btn-reset { background: #334155; color: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>👤 Персональная анкета</h2>
+    <p class="sub">Лабораторная работа №8 (Вариант 2) · Автосохранение формы</p>
+
+    <div class="status-msg" id="statusMsg"></div>
+
+    <form id="profileForm">
+      <div class="form-group">
+        <label>ФИО студента</label>
+        <input type="text" id="studentName" placeholder="Иванов Иван Иванович" required>
+      </div>
+
+      <div class="form-group">
+        <label>Академическая группа</label>
+        <input type="text" id="studentGroup" placeholder="ИС-25-22" required>
+      </div>
+
+      <div class="form-group">
+        <label>Город проживания</label>
+        <input type="text" id="studentCity" placeholder="Москва" required>
+      </div>
+
+      <div class="form-group">
+        <label>Курс обучения</label>
+        <select id="studentYear">
+          <option value="1">1 курс</option>
+          <option value="2">2 курс</option>
+          <option value="3">3 курс</option>
+          <option value="4">4 курс</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-reset" id="resetBtn">Сбросить данные</button>
+        <button type="submit" class="btn-save">Сохранить в хранилище</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const KEY = 'lab8_student_profile';
+    const form = document.getElementById('profileForm');
+    const nameEl = document.getElementById('studentName');
+    const groupEl = document.getElementById('studentGroup');
+    const cityEl = document.getElementById('studentCity');
+    const yearEl = document.getElementById('studentYear');
+    const statusMsg = document.getElementById('statusMsg');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // Восстановление данных при загрузке
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (saved) {
+        nameEl.value = saved.name || '';
+        groupEl.value = saved.group || '';
+        cityEl.value = saved.city || '';
+        yearEl.value = saved.year || '1';
+        statusMsg.textContent = '✓ Данные профиля восстановлены из localStorage';
+      }
+    } catch (e) {
+      console.warn('Ошибка чтения из localStorage:', e);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const profile = {
+        name: nameEl.value.trim(),
+        group: groupEl.value.trim(),
+        city: cityEl.value.trim(),
+        year: yearEl.value,
+        updatedAt: new Date().toLocaleString()
+      };
+      localStorage.setItem(KEY, JSON.stringify(profile));
+      statusMsg.textContent = '✓ Успешно сохранено (' + profile.updatedAt + ')';
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Очистить сохраненную анкету?')) {
+        localStorage.removeItem(KEY);
+        form.reset();
+        statusMsg.textContent = 'Данные анкеты очищены.';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Геометрия — ES Modules</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 24px 16px; display: flex; justify-content: center; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h2 { color: #38bdf8; font-size: 20px; text-align: center; margin-bottom: 4px; }
+    .sub { color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 18px; }
+    .figure-select { display: flex; gap: 8px; margin-bottom: 16px; justify-content: center; }
+    .f-btn { background: #0f172a; color: #94a3b8; border: 1px solid #334155; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .f-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
+    .input-grp { margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+    input { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+    .res-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; margin-top: 16px; text-align: center; }
+    .res-box strong { color: #4ade80; font-size: 17px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>📐 Калькулятор геометрии</h2>
+    <p class="sub">Лабораторная работа №10 (Вариант 4) · Модуль geometry.js</p>
+
+    <div class="figure-select">
+      <button class="f-btn active" id="rectBtn">Прямоугольник</button>
+      <button class="f-btn" id="circleBtn">Круг</button>
+    </div>
+
+    <div id="rectInputs">
+      <div class="input-grp">
+        <label>Длина (a)</label>
+        <input type="number" id="lengthInput" value="10" min="0">
+      </div>
+      <div class="input-grp">
+        <label>Ширина (b)</label>
+        <input type="number" id="widthInput" value="5" min="0">
+      </div>
+    </div>
+
+    <div id="circleInputs" style="display:none;">
+      <div class="input-grp">
+        <label>Радиус круга (R)</label>
+        <input type="number" id="radiusInput" value="7" min="0">
+      </div>
+    </div>
+
+    <div class="res-box" id="resBox">
+      Площадь S = <strong id="areaVal">50.00</strong> | Периметр P = <strong id="perimVal">30.00</strong>
+    </div>
+  </div>
+
+  <script type="module">
+    // geometry.js
+    export function rectArea(a, b) { return a * b; }
+    export function rectPerim(a, b) { return 2 * (a + b); }
+    export function circleArea(r) { return Math.PI * r * r; }
+    export function circlePerim(r) { return 2 * Math.PI * r; }
+
+    // main.js
+    let mode = 'rect';
+    const rectBtn = document.getElementById('rectBtn');
+    const circleBtn = document.getElementById('circleBtn');
+    const rectInputs = document.getElementById('rectInputs');
+    const circleInputs = document.getElementById('circleInputs');
+    const lengthInput = document.getElementById('lengthInput');
+    const widthInput = document.getElementById('widthInput');
+    const radiusInput = document.getElementById('radiusInput');
+    const areaVal = document.getElementById('areaVal');
+    const perimVal = document.getElementById('perimVal');
+
+    function calc() {
+      if (mode === 'rect') {
+        const l = parseFloat(lengthInput.value) || 0;
+        const w = parseFloat(widthInput.value) || 0;
+        areaVal.textContent = rectArea(l, w).toFixed(2);
+        perimVal.textContent = rectPerim(l, w).toFixed(2);
+      } else {
+        const r = parseFloat(radiusInput.value) || 0;
+        areaVal.textContent = circleArea(r).toFixed(2);
+        perimVal.textContent = circlePerim(r).toFixed(2);
+      }
+    }
+
+    rectBtn.addEventListener('click', () => {
+      mode = 'rect';
+      rectBtn.classList.add('active');
+      circleBtn.classList.remove('active');
+      rectInputs.style.display = 'block';
+      circleInputs.style.display = 'none';
+      calc();
+    });
+
+    circleBtn.addEventListener('click', () => {
+      mode = 'circle';
+      circleBtn.classList.add('active');
+      rectBtn.classList.remove('active');
+      circleInputs.style.display = 'block';
+      rectInputs.style.display = 'none';
+      calc();
+    });
+
+    [lengthInput, widthInput, radiusInput].forEach(inp => inp.addEventListener('input', calc));
+    calc();
+  </script>
+</body>
+</html>

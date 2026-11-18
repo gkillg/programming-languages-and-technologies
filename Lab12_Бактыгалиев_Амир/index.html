@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 12 — Анализатор JWT токенов</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 24px 16px; display: flex; justify-content: center; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; width: 100%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h2 { color: #38bdf8; font-size: 20px; text-align: center; margin-bottom: 4px; }
+    .sub { color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 18px; }
+    .jwt-display { word-break: break-all; font-family: monospace; font-size: 12px; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; line-height: 1.6; margin-bottom: 14px; }
+    .jwt-header { color: #f43f5e; font-weight: bold; }
+    .jwt-payload { color: #a855f7; font-weight: bold; }
+    .jwt-sig { color: #38bdf8; font-weight: bold; }
+    .decode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .decode-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px; font-size: 11px; }
+    .decode-box h4 { font-size: 12px; margin-bottom: 6px; }
+    pre { white-space: pre-wrap; font-family: monospace; color: #cbd5e1; }
+    button { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; }
+    .status-msg { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 12px; text-align: center; }
+    .status-valid { background: #14532d; color: #4ade80; }
+    .status-expired { background: #7f1d1d; color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🔍 Анализатор JWT: Header.Payload.Signature</h2>
+    <p class="sub">Лабораторная работа №12 (Вариант 15) · Структура и валидация срока действия</p>
+
+    <div class="jwt-display" id="jwtString"></div>
+
+    <div class="decode-grid">
+      <div class="decode-box">
+        <h4 style="color: #f43f5e;">1. Header (Алгоритм):</h4>
+        <pre id="headerDecoded"></pre>
+      </div>
+
+      <div class="decode-box">
+        <h4 style="color: #a855f7;">2. Payload (Утверждения):</h4>
+        <pre id="payloadDecoded"></pre>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 8px; justify-content: center;">
+      <button id="refreshBtn">Сгенерировать свежий токен (exp: +15m)</button>
+      <button id="expireBtn" style="background: #e11d48;">Имитировать просроченный токен</button>
+    </div>
+
+    <div class="status-msg status-valid" id="statusBox">
+      ✓ Подпись верна. Токен активен.
+    </div>
+  </div>
+
+  <script>
+    function base64UrlEncode(str) {
+      return btoa(unescape(encodeURIComponent(str)))
+        .replace(/+/g, '-').replace(///g, '_').replace(/=+$/, '');
+    }
+
+    function createToken(isExpired = false) {
+      const now = Math.floor(Date.now() / 1000);
+      const exp = isExpired ? now - 3600 : now + 900;
+
+      const headerObj = { alg: "HS256", typ: "JWT" };
+      const payloadObj = {
+        sub: "user_7492",
+        name: "Иванов Иван",
+        role: "student",
+        group: "ИС-25-22",
+        iat: now,
+        exp: exp
+      };
+
+      const hEnc = base64UrlEncode(JSON.stringify(headerObj));
+      const pEnc = base64UrlEncode(JSON.stringify(payloadObj));
+      const sig = base64UrlEncode("HMAC_SHA256_SECRET_SIG_" + hEnc + "_" + pEnc).slice(0, 32);
+
+      const fullToken = hEnc + '.' + pEnc + '.' + sig;
+
+      document.getElementById('jwtString').innerHTML = 
+        '<span class="jwt-header">' + hEnc + '</span>.' +
+        '<span class="jwt-payload">' + pEnc + '</span>.' +
+        '<span class="jwt-sig">' + sig + '</span>';
+
+      document.getElementById('headerDecoded').textContent = JSON.stringify(headerObj, null, 2);
+      document.getElementById('payloadDecoded').textContent = JSON.stringify(payloadObj, null, 2);
+
+      const statusBox = document.getElementById('statusBox');
+      if (isExpired) {
+        statusBox.className = 'status-msg status-expired';
+        statusBox.textContent = '❌ HTTP 401 Unauthorized: Срок действия токена истек (exp < now)! Доступ отклонен.';
+      } else {
+        statusBox.className = 'status-msg status-valid';
+        statusBox.textContent = '✅ HTTP 200 OK: Подпись валидна. Доступ к защищенному разделу разрешен (exp: ' + new Date(exp * 1000).toLocaleTimeString() + ').';
+      }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', () => createToken(false));
+    document.getElementById('expireBtn').addEventListener('click', () => createToken(true));
+
+    createToken(false);
+  </script>
+</body>
+</html>

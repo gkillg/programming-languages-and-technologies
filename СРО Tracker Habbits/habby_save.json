@@ -1,44 +1,86 @@
 {
-    "users": {
-        "HB-7257": {
-            "nickname": "Амир",
-            "player": {
-                "xp": 0,
-                "level": 3,
-                "completed_total": 3
-            },
-            "habits": [
-                {
-                    "name": "Сдать Сро",
-                    "streak": 0,
-                    "best_streak": 0,
-                    "last_completed": null
-                },
-                {
-                    "name": "Выполнить лаб.раб по ЯиТП",
-                    "streak": 1,
-                    "best_streak": 1,
-                    "last_completed": "2026-10-21"
-                },
-                {
-                    "name": "Защитить СРо презентацией",
-                    "streak": 0,
-                    "best_streak": 0,
-                    "last_completed": null
-                },
-                {
-                    "name": "Я крут",
-                    "streak": 1,
-                    "best_streak": 1,
-                    "last_completed": "2026-10-21"
-                },
-                {
-                    "name": "Рашидинов ТОП",
-                    "streak": 1,
-                    "best_streak": 1,
-                    "last_completed": "2026-10-21"
-                }
-            ]
+  "users": {
+    "HB-4921": {
+      "nickname": "HERO",
+      "player": {
+        "xp": 45,
+        "level": 3,
+        "completed_total": 14,
+        "status": "Хранитель недели",
+        "artifacts": ["Золотой картридж DMG"]
+      },
+      "habits": [
+        {
+          "name": "Чтение книги",
+          "streak": 7,
+          "best_streak": 7,
+          "last_completed": "2026-11-18",
+          "created_at": "2026-11-01"
+        },
+        {
+          "name": "Бег",
+          "streak": 2,
+          "best_streak": 5,
+          "last_completed": "2026-11-17",
+          "created_at": "2026-11-01"
         }
+      ],
+      "achievements": [
+        {
+          "id": "streak_7",
+          "tier": "weekly",
+          "icon": "[7D]",
+          "title": "Недельный воин",
+          "description": "Серия 7 дней подряд",
+          "bonus_xp": 100,
+          "status_grant": "Хранитель недели",
+          "artifact": null,
+          "unlocked_at": "2026-11-18 14:22"
+        }
+      ],
+      "last_active_date": "2026-11-18",
+      "daily_log": {
+        "date": "2026-11-18",
+        "entries": [
+          {
+            "habit_name": "Чтение книги",
+            "time": "14:22",
+            "xp": 65,
+            "streak": 7
+          }
+        ]
+      },
+      "daily_archive": {
+        "2026-11-17": [
+          {
+            "habit_name": "Чтение книги",
+            "time": "20:10",
+            "xp": 60,
+            "streak": 6
+          },
+          {
+            "habit_name": "Бег",
+            "time": "18:45",
+            "xp": 40,
+            "streak": 2
+          }
+        ]
+      },
+      "history": {
+        "2026-11-17": {
+          "completed": [
+            {"name": "Чтение книги", "time": "20:10", "xp": 60},
+            {"name": "Бег", "time": "18:45", "xp": 40}
+          ],
+          "missed": []
+        },
+        "2026-11-18": {
+          "completed": [
+            {"name": "Чтение книги", "time": "14:22", "xp": 65}
+          ],
+          "missed": []
+        }
+      }
     }
+  }
 }

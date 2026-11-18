@@ -2,6 +2,180 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <title>Лаб 12 — Вариант 15 (JWT Demo с проверкой)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; padding: 20px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 650px; }
+    .card { background: #1e293b; border: 1px solid #334155; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    h2 { color: #38bdf8; text-align: center; margin-bottom: 15px; font-size: 18px; }
+    input { width: 100%; padding: 10px; margin: 6px 0; background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; }
+    button { background: #0284c7; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 8px; }
+    button:hover { background: #0ea5e9; }
+    .danger { background: #e11d48 !important; }
+    .hidden { display: none; }
+    .log { background: #0f172a; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 12px; margin-top: 10px; border: 1px solid #334155; white-space: pre-wrap; word-break: break-all; }
+    .success { color: #4ade80; }
+    .error { color: #fca5a5; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .box { background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155; font-size: 11px; }
+    .box h4 { margin-bottom: 6px; color: #38bdf8; }
+    pre { white-space: pre-wrap; font-family: monospace; color: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>Лабораторная работа №12 — Вариант 15 (JWT)</h2>
+      
+      <!-- Форма входа -->
+      <div id="loginSection">
+        <input type="text" id="username" placeholder="Логин" value="student">
+        <input type="password" id="password" placeholder="Пароль" value="password123">
+        <button id="loginBtn">Войти в систему</button>
+      </div>
+
+      <!-- Панель управления -->
+      <div id="dashboardSection" class="hidden">
+        <p class="success" style="text-align:center; margin-bottom:10px;">✓ Сессия активна</p>
+        <button id="fetchDataBtn">Проверить защищенный эндпоинт (/api/protected)</button>
+        <button id="logoutBtn" class="danger">Выйти</button>
+      </div>
+    </div>
+
+    <!-- Блок интерактивного анализатора JWT (для проверки) -->
+    <div class="card">
+      <h2>🔍 Интерактивный разбор JWT в реальном времени</h2>
+      <div class="box" style="margin-bottom: 10px;">
+        <h4 style="color: #f43f5e;">Текущий токен:</h4>
+        <pre id="rawTokenDisplay">Токен еще не получен</pre>
+      </div>
+      <div class="grid">
+        <div class="box">
+          <h4 style="color: #f43f5e;">1. Header:</h4>
+          <pre id="headerDecoded">-</pre>
+        </div>
+        <div class="box">
+          <h4 style="color: #a855f7;">2. Payload (Утверждения):</h4>
+          <pre id="payloadDecoded">-</pre>
+        </div>
+      </div>
+      <div class="log" id="logOutput">Статус: Готово к проверке.</div>
+    </div>
+  </div>
+
+  <script>
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const fetchDataBtn = document.getElementById('fetchDataBtn');
+    const loginSection = document.getElementById('loginSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const logOutput = document.getElementById('logOutput');
+    
+    const rawTokenDisplay = document.getElementById('rawTokenDisplay');
+    const headerDecoded = document.getElementById('headerDecoded');
+    const payloadDecoded = document.getElementById('payloadDecoded');
+
+    let currentToken = localStorage.getItem('jwt_token');
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function parseHeader(token) {
+      try {
+        const base64Url = token.split('.')[0];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function updateView() {
+      if (currentToken) {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        rawTokenDisplay.textContent = currentToken;
+        
+        const header = parseHeader(currentToken);
+        const payload = parseJwt(currentToken);
+        
+        headerDecoded.textContent = JSON.stringify(header, null, 2);
+        payloadDecoded.textContent = JSON.stringify(payload, null, 2);
+      } else {
+        loginSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+        rawTokenDisplay.textContent = 'Токен отсутствует';
+        headerDecoded.textContent = '-';
+        payloadDecoded.textContent = '-';
+      }
+    }
+    updateView();
+
+    loginBtn.addEventListener('click', async () => {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        currentToken = data.token;
+        localStorage.setItem('jwt_token', currentToken);
+        updateView();
+        logOutput.className = 'log success';
+        logOutput.textContent = 'Успех: Токен успешно получен и сохранен.';
+      } catch (err) {
+        logOutput.className = 'log error';
+        logOutput.textContent = `Ошибка входа: ${err.message}`;
+      }
+    });
+
+    fetchDataBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/protected', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        logOutput.className = 'log success';
+        logOutput.textContent = `Ответ сервера (/api/protected):\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        logOutput.className = 'log error';
+        logOutput.textContent = `Ошибка доступа: ${err.message}`;
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      currentToken = null;
+      localStorage.removeItem('jwt_token');
+      updateView();
+      logOutput.className = 'log';
+      logOutput.textContent = 'Сессия завершена.';
+    });
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
   <title>Лаб 12 — Анализатор JWT токенов</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }

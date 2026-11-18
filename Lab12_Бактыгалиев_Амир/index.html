@@ -55,7 +55,9 @@
   <script>
     function base64UrlEncode(str) {
       return btoa(unescape(encodeURIComponent(str)))
-        .replace(/+/g, '-').replace(///g, '_').replace(/=+$/, '');
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
     }
 
     function createToken(isExpired = false) {
@@ -75,8 +77,6 @@
       const hEnc = base64UrlEncode(JSON.stringify(headerObj));
       const pEnc = base64UrlEncode(JSON.stringify(payloadObj));
       const sig = base64UrlEncode("HMAC_SHA256_SECRET_SIG_" + hEnc + "_" + pEnc).slice(0, 32);
-
-      const fullToken = hEnc + '.' + pEnc + '.' + sig;
 
       document.getElementById('jwtString').innerHTML = 
         '<span class="jwt-header">' + hEnc + '</span>.' +
